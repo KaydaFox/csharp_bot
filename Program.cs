@@ -33,6 +33,7 @@ namespace WorldsWorstDiscordBot
             slash.RegisterCommands<PingSlashCommand>();
 
             commands.RegisterCommands<PingCommand>();
+            commands.RegisterCommands<FoxCommand>();
 
             await discord.ConnectAsync();
             await Task.Delay(-1);
