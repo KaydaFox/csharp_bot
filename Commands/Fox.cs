@@ -16,7 +16,6 @@ public class FoxCommand : BaseCommandModule
         {
             string jsonResponse = await response.Content.ReadAsStringAsync();
             var dictionary = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonResponse);
-            Console.WriteLine("Fuck you <3");
             // 'dictionary' now holds the deserialized JSON data as a dictionary.
 
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder();
