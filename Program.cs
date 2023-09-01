@@ -35,6 +35,7 @@ namespace MidTierDiscordBot
 
             SlashCommandsExtension slash = discord.UseSlashCommands();
             slash.RegisterCommands<PingSlashCommand>();
+            slash.RegisterCommands<FoxSlashCommand>();
 
             commands.RegisterCommands<PingCommand>();
             commands.RegisterCommands<FoxCommand>();
