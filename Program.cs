@@ -1,6 +1,7 @@
 ﻿using DSharpPlus;
 using DSharpPlus.CommandsNext;
 using DSharpPlus.SlashCommands;
+using System.Reflection;
 
 namespace MidTierDiscordBot
 {
@@ -34,11 +35,8 @@ namespace MidTierDiscordBot
             });
 
             SlashCommandsExtension slash = discord.UseSlashCommands();
-            slash.RegisterCommands<PingSlashCommand>();
-            slash.RegisterCommands<FoxSlashCommand>();
-
-            commands.RegisterCommands<PingCommand>();
-            commands.RegisterCommands<FoxCommand>();
+            slash.RegisterCommands(Assembly.GetExecutingAssembly());
+            commands.RegisterCommands(Assembly.GetExecutingAssembly());
 
             await discord.ConnectAsync();
             await Task.Delay(-1);
