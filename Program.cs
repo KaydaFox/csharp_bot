@@ -2,34 +2,38 @@
 using DSharpPlus.CommandsNext;
 using DSharpPlus.SlashCommands;
 
-namespace WorldsWorstDiscordBot
+namespace MidTierDiscordBot
 {
     class Program
     {
         static async Task Main(string[] args)
         {
-            var config = File.ReadAllText("config.txt").Split('\n');
-            Dictionary<string, string> openWith = new Dictionary<string, string>();
+            string[] textdata = File.ReadAllText("config.txt").Split('\n');
+            Dictionary<string, string> config = new Dictionary<string, string>();
 
-            foreach (var item in config)
+            foreach (string item in textdata)
             {
-                var subitems = item.Split('=');
-                openWith.Add(subitems[0], subitems[1]);
+                string[] subitems = item.Split('=');
+                if (subitems.Length > 1) 
+                {
+                    config.Add(subitems[0], subitems[1]);
+                }
+               
             }
 
-            var discord = new DiscordClient(new DiscordConfiguration()
+            DiscordClient discord = new DiscordClient(new DiscordConfiguration()
             {
-                Token = openWith["TOKEN"],
+                Token = config["TOKEN"],
                 TokenType = TokenType.Bot,
                 Intents = DiscordIntents.AllUnprivileged | DiscordIntents.MessageContents
             });
 
-            var commands = discord.UseCommandsNext(new CommandsNextConfiguration()
+            CommandsNextExtension commands = discord.UseCommandsNext(new CommandsNextConfiguration()
             {
                 StringPrefixes = new[] { ">." }
             });
 
-            var slash = discord.UseSlashCommands();
+            SlashCommandsExtension slash = discord.UseSlashCommands();
             slash.RegisterCommands<PingSlashCommand>();
 
             commands.RegisterCommands<PingCommand>();

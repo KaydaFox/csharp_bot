@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using DSharpPlus.CommandsNext;
+﻿using DSharpPlus.CommandsNext;
 using DSharpPlus.CommandsNext.Attributes;
 using DSharpPlus.Entities;
 
@@ -12,7 +11,7 @@ public class PingCommand : BaseCommandModule
 
         DiscordEmbedBuilder embed = new DiscordEmbedBuilder
         {
-            Color = new DiscordColor("#fe9fc6"),
+            Color = new DiscordColor("#fe9fc6")
         };
 
         embed.AddField("BOT Latency", $"```ini\n[ {ctx.Client.Ping}ms ]```", true);

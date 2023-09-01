@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-using DSharpPlus.SlashCommands;
-using DSharpPlus.SlashCommands.Attributes;
+﻿using DSharpPlus.SlashCommands;
 using DSharpPlus.Entities;
 using Newtonsoft.Json;
 
@@ -15,14 +13,19 @@ public class FoxSlashCommand : ApplicationCommandModule
         if (response.IsSuccessStatusCode)
         {
             string jsonResponse = await response.Content.ReadAsStringAsync();
-            var dictionary = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonResponse);
-            Console.WriteLine("Fuck you <3");
-            // 'dictionary' now holds the deserialized JSON data as a dictionary.
-
-            DiscordEmbedBuilder embed = new DiscordEmbedBuilder();
-            embed.WithImageUrl(dictionary["link"].ToString());
-
-            await ctx.CreateResponseAsync(embed);
+            Dictionary<string, object>? dictionary = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonResponse);
+            if (dictionary != null)
+            {
+                DiscordEmbedBuilder embed = new DiscordEmbedBuilder();
+                embed.WithImageUrl(dictionary["link"].ToString());
+                await ctx.CreateResponseAsync(embed);
+            }
+            else
+            {
+                Console.WriteLine("Json failed to load");
+                await ctx.CreateResponseAsync("Failed to load json");
+            }
+     
         }
         else
         {
