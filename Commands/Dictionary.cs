@@ -51,7 +51,6 @@ public class DictCommand : BaseCommandModule
     }
 }
 
-
 public class DictSlashCommand : ApplicationCommandModule
 {
     [SlashCommand("dictionary", "definition of a word")]
