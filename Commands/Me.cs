@@ -10,7 +10,6 @@ public class TimeCommand : BaseCommandModule
     [Command("time")]
     public async Task Command(CommandContext ctx)
     {
-        Console.WriteLine("OwO");
         await ctx.Message.RespondAsync(GenerateEmbed());
     }
 
