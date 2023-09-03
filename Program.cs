@@ -92,8 +92,9 @@ namespace MidTierDiscordBot
                                     }
                                 }
 
-                                if (!foundMatch) // This is where new entries are added
+                                if (!foundMatch && activity.ActivityType != ActivityType.Custom) // This is where new entries are added
                                 {
+                                // We don't want to store a custom status in this so I excluded it
                                     activityEntry.Add("Name", activity.Name);
                                     activityEntry.Add("Type", activity.ActivityType.ToString());
                                     activityEntry.Add("StartTime", DateTime.Now.ToString());
@@ -106,11 +107,14 @@ namespace MidTierDiscordBot
                                 }
                                 else // This is where the running state is applied
                                 {
-                                    if (activityEntry["Running"] == "false")
+                                    if(activity.ActivityType != ActivityType.Custom)
                                     {
-                                        activityEntry["Running"] = "true";
-                                        activityEntry["StartTime"] = DateTime.Now.ToString();
-                                        activitesChanged = true;
+                                        if (activityEntry["Running"] == "false")
+                                        {
+                                            activityEntry["Running"] = "true";
+                                            activityEntry["StartTime"] = DateTime.Now.ToString();
+                                            activitesChanged = true;
+                                        }
                                     }
                                 }
                             }
