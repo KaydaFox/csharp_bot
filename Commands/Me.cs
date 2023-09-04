@@ -15,8 +15,8 @@ public class TimeCommand : BaseCommandModule
 
     public static DiscordEmbedBuilder GenerateEmbed() 
     {
-        var embed = new DiscordEmbedBuilder();
-        foreach (var activity in Program.globalActivites)
+        DiscordEmbedBuilder embed = new DiscordEmbedBuilder();
+        foreach (Dictionary<string, string> activity in Program.globalActivites)
         {
             int.TryParse(activity["Duration"], out int activityDuration);
 

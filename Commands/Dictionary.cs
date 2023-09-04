@@ -26,8 +26,7 @@ public class DictCommand : BaseCommandModule
             {
                 jsonResponse = jsonResponse.Substring(1, jsonResponse.Length - 2);
             }
-            var dictionary = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonResponse);
-            // 'dictionary' now holds the deserialized JSON data as a dictionary.
+            Dictionary<string, object>? dictionary = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonResponse);
 
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder();
             embed.Title = dictionary["word"] as string;

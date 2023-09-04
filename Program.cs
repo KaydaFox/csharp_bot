@@ -51,13 +51,13 @@ namespace MidTierDiscordBot
         // i want to do this so i can keep track of it in a file
         private static async Task UpdateLoop(Dictionary<string, string> config, DiscordClient client)
         {
-            var mainServer = await client.GetGuildAsync(ulong.Parse(config["GUILD_ID"]));
+            DiscordGuild? mainServer = await client.GetGuildAsync(ulong.Parse(config["GUILD_ID"]));
 
             if(File.Exists("activities.json"))
             {
                 globalActivites = JsonConvert.DeserializeObject<List<Dictionary<string, string>>>(await File.ReadAllTextAsync("activities.json"));
             }
-            foreach (var activity in globalActivites) 
+            foreach (Dictionary<string, string> activity in globalActivites) 
             {
                 activity["Running"] = "false";
                 activity["EndTime"] = "";
@@ -71,90 +71,82 @@ namespace MidTierDiscordBot
                 // Wait for a specified amount of time before the next update
                 if (mainServer != null && !mainServer.IsUnavailable)
                 {
-                    var userData = await mainServer.GetMemberAsync(ulong.Parse(config["USER_ID"]));
-                    if (userData != null)
+                    DiscordMember userData = await mainServer.GetMemberAsync(ulong.Parse(config["USER_ID"]));
+                    if (userData != null && userData.Presence != null)
                     {
-                        if (userData.Presence != null)
+                        bool activitesChanged = false;
+                        foreach (DiscordActivity activity in userData.Presence.Activities)
                         {
-                            bool activitesChanged = false;
+                            if (activity.ActivityType != ActivityType.Custom)
+                            {
+                                continue;
+                            }
+                            Dictionary<string, string> activityEntry = new Dictionary<string, string>();
+                            bool foundMatch = false;
+
+                            foreach (Dictionary<string, string> globalActivity in Program.globalActivites)
+                            {
+                                if (globalActivity["Name"] == activity.Name)
+                                {
+                                    foundMatch = true;
+                                    activityEntry = globalActivity;
+                                    break;
+                                }
+                            }
+
+                            if (!foundMatch) // This is where new entries are added
+                            {
+                                // We don't want to store a custom status in this so I excluded it
+                                activityEntry.Add("Name", activity.Name);
+                                activityEntry.Add("Type", activity.ActivityType.ToString());
+                                activityEntry.Add("StartTime", DateTime.Now.ToString());
+                                activityEntry.Add("EndTime", "");
+                                activityEntry.Add("Running", "true");
+                                activityEntry.Add("Duration", "0");
+                                globalActivites.Add(activityEntry);
+
+                                activitesChanged = true;
+                            }
+                            else if (activityEntry["Running"] == "false") // This is where the running state is applied
+                            {
+                                activityEntry["Running"] = "true";
+                                activityEntry["StartTime"] = DateTime.Now.ToString();
+                                activitesChanged = true;
+                            }
+                        }
+
+                        foreach (Dictionary<string, string> globalActivity in Program.globalActivites)
+                        {
+                            bool foundMatch = false;
                             foreach (DiscordActivity activity in userData.Presence.Activities)
                             {
-                                Dictionary<string, string> activityEntry = new Dictionary<string, string>();
-                                bool foundMatch = false;
-
-                                foreach (var globalActivity in Program.globalActivites)
+                                if (globalActivity["Name"] == activity.Name)
                                 {
-                                    if (globalActivity["Name"] == activity.Name)
-                                    {
-                                        foundMatch = true;
-                                        activityEntry = globalActivity;
-                                        break;
-                                    }
-                                }
-
-                                if (!foundMatch && activity.ActivityType != ActivityType.Custom) // This is where new entries are added
-                                {
-                                // We don't want to store a custom status in this so I excluded it
-                                    activityEntry.Add("Name", activity.Name);
-                                    activityEntry.Add("Type", activity.ActivityType.ToString());
-                                    activityEntry.Add("StartTime", DateTime.Now.ToString());
-                                    activityEntry.Add("EndTime", "");
-                                    activityEntry.Add("Running", "true");
-                                    activityEntry.Add("Duration", "0");
-                                    globalActivites.Add(activityEntry);
-
-                                    activitesChanged = true;
-                                }
-                                else // This is where the running state is applied
-                                {
-                                    if(activity.ActivityType != ActivityType.Custom)
-                                    {
-                                        if (activityEntry["Running"] == "false")
-                                        {
-                                            activityEntry["Running"] = "true";
-                                            activityEntry["StartTime"] = DateTime.Now.ToString();
-                                            activitesChanged = true;
-                                        }
-                                    }
+                                    foundMatch = true;
+                                    break;
                                 }
                             }
 
-                            foreach (var globalActivity in Program.globalActivites)
+                            if (!foundMatch && globalActivity["Running"] == "true")
                             {
-                                bool foundMatch = false;
-                                foreach (DiscordActivity activity in userData.Presence.Activities)
-                                {
-                                    if (globalActivity["Name"] == activity.Name)
-                                    {
-                                        foundMatch = true;
-                                        break;
-                                    }
-                                }
+                                globalActivity["Running"] = "false";
+                                globalActivity["EndTime"] = DateTime.Now.ToString();
+                                string dateStr = globalActivity["StartTime"];
 
-                                if(!foundMatch)
-                                {
-                                    if (globalActivity["Running"] == "true")
-                                    {
-                                        globalActivity["Running"] = "false";
-                                        globalActivity["EndTime"] = DateTime.Now.ToString();
-                                        string dateStr = globalActivity["StartTime"];
+                                DateTime startTime = DateTime.ParseExact(dateStr, "M/d/yyyy h:mm:ss tt", CultureInfo.InvariantCulture);
 
-                                        DateTime startTime = DateTime.ParseExact(dateStr, "M/d/yyyy h:mm:ss tt", CultureInfo.InvariantCulture);
+                                TimeSpan elapsedSpan = new TimeSpan(DateTime.Now.Ticks - startTime.Ticks);
 
-                                        TimeSpan elapsedSpan = new TimeSpan(DateTime.Now.Ticks - startTime.Ticks);
+                                int.TryParse(globalActivity["Duration"], out int activityDuration);
 
-                                        int.TryParse(globalActivity["Duration"], out int activityDuration);
+                                activityDuration += (int)elapsedSpan.TotalSeconds;
 
-                                        activityDuration += (int) elapsedSpan.TotalSeconds;
-
-                                        globalActivity["Duration"] = activityDuration.ToString();
-                                        activitesChanged = true;
-                                    }
-                                }
+                                globalActivity["Duration"] = activityDuration.ToString();
+                                activitesChanged = true;
                             }
-                       
-                            if(activitesChanged) await File.WriteAllTextAsync("activities.json", JsonConvert.SerializeObject(globalActivites, Formatting.Indented));
                         }
+
+                        if (activitesChanged) await File.WriteAllTextAsync("activities.json", JsonConvert.SerializeObject(globalActivites, Formatting.Indented));
                     }
                 }
 

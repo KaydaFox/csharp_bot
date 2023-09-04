@@ -21,8 +21,7 @@ public class FoxCommand : BaseCommandModule
         if (response.IsSuccessStatusCode)
         {
             string jsonResponse = await response.Content.ReadAsStringAsync();
-            var dictionary = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonResponse);
-            // 'dictionary' now holds the deserialized JSON data as a dictionary.
+            Dictionary<string, object>? dictionary = JsonConvert.DeserializeObject<Dictionary<string, object>>(jsonResponse);
 
             DiscordEmbedBuilder embed = new DiscordEmbedBuilder();
             embed.WithImageUrl(dictionary["link"].ToString());
