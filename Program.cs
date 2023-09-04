@@ -77,7 +77,7 @@ namespace MidTierDiscordBot
                         bool activitesChanged = false;
                         foreach (DiscordActivity activity in userData.Presence.Activities)
                         {
-                            if (activity.ActivityType != ActivityType.Custom)
+                            if (activity.ActivityType == ActivityType.Custom)
                             {
                                 continue;
                             }
@@ -96,7 +96,6 @@ namespace MidTierDiscordBot
 
                             if (!foundMatch) // This is where new entries are added
                             {
-                                // We don't want to store a custom status in this so I excluded it
                                 activityEntry.Add("Name", activity.Name);
                                 activityEntry.Add("Type", activity.ActivityType.ToString());
                                 activityEntry.Add("StartTime", DateTime.Now.ToString());
