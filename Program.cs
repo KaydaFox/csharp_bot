@@ -11,11 +11,11 @@ namespace MidTierDiscordBot
     class Program
     {
         public static List<Dictionary<string, string>> globalActivites = new List<Dictionary<string, string>>();
+        public static Dictionary<string, string> config = new Dictionary<string, string>();
 
         static async Task Main(string[] args)
         {
             string[] textdata = File.ReadAllText("config.txt").Split('\n');
-            Dictionary<string, string> config = new Dictionary<string, string>();
 
             foreach (string item in textdata)
             {
